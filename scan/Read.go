@@ -57,16 +57,15 @@ func (r *ReaderImplRPM) Read(addr, size uint) ([]byte, error) {
 	remote := r.iovPool.Get().(*syscall.Iovec)
 	remote.Base = (*byte)(unsafe.Pointer(uintptr(addr))) //I'm sure that's right,may some other way can clear go vet warning
 	remote.Len = uint64(size)
-	niladdr := &struct{}{}
 	_, _, e1 := syscall.Syscall6(syscall.SYS_PROCESS_VM_READV,
 		uintptr(r.pid),
-		uintptr(unsafe.Pointer(&local)),
+		uintptr(unsafe.Pointer(local)),
 		1,
-		uintptr(unsafe.Pointer(&remote)),
+		uintptr(unsafe.Pointer(remote)),
 		1,
 		0)
 	if e1 != 0 {
-		return nil, errors.New("syscall error ,ret " + e1.Error())
+		return nil, errors.New("syscall error:" + e1.Error())
 	}
 	r.iovPool.Put(local)
 	r.iovPool.Put(remote)
