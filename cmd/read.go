@@ -17,7 +17,7 @@ var readCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		addr, err := strconv.ParseUint(args[1], 0, 32)
+		addr, err := strconv.ParseUint(args[1], 0, 64)
 		if err != nil {
 			return err
 		}
