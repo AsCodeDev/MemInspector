@@ -1,10 +1,7 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -29,5 +26,7 @@ func Execute() {
 }
 
 func init() {
-
+	if os.Getuid() != 0 {
+		log.Fatalln("Running without root is not supported temporarily")
+	}
 }

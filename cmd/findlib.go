@@ -26,7 +26,7 @@ var findlibCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			cmd.Printf("Base Address of %s: %x", args[0], addr)
+			cmd.Printf("Base Address of %s: %x\n", args[1], addr)
 		}
 		return nil
 	},

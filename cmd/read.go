@@ -33,7 +33,7 @@ func doCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	size := uint64(4)
-	reader := scan.NewReader(uint(pid), scan.READER_IMPL_RPM)
+	reader := scan.NewReader(uint(pid), scan.READER_IMPL_RPM_WITH_ANTI)
 	if len(args) == 3 {
 		size, err = strconv.ParseUint(args[2], 0, 32)
 		if err != nil {
@@ -60,6 +60,7 @@ func doCommand(cmd *cobra.Command, args []string) error {
 	}
 	if *format != "" {
 		cmd.Printf(*format, data)
+		return nil
 	}
 	cmd.Println(hex.EncodeToString(data))
 	return nil
@@ -70,7 +71,7 @@ func init() {
 	hexdump = readCmd.Flags().Bool("hex", false, "output in hexdump style")
 	str = readCmd.Flags().Bool("str", false, "convert to string")
 	format = readCmd.Flags().StringP("format", "f", "", "print by custom format")
-	filename = readCmd.Flags().StringP("file", "f", "", "output to file")
+	filename = readCmd.Flags().StringP("file", "o", "", "output to file")
 	readCmd.MarkFlagsMutuallyExclusive("hex", "str", "format")
 	//readCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
