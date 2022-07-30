@@ -41,6 +41,7 @@ func doCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 	data, err := reader.Read(uint(addr), uint(size))
+	data, err = reader.Read(uint(addr), uint(size))
 	if err != nil {
 		return err
 	}

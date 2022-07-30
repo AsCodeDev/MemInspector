@@ -82,7 +82,7 @@ func (r *ReaderImplRPM) Read(addr, size uint) ([]byte, error) {
 
 type ReaderImplRPMWithAnti struct {
 	ReaderImplRPM
-	safeBitSet [262144]uint64 // 2^24 is the max number of user's pages in a process , all pages status cost 2MB memory.
+	safeBitSet [2097152]uint64 // 2^27 is the max number of user's pages in a process , all pages status cost 16MB memory.
 	pageMap    *os.File
 }
 
@@ -98,20 +98,32 @@ func (r *ReaderImplRPMWithAnti) initImpl() *Reader {
 	return &r.Reader
 }
 
-// TODO: caching page status and make anti standalone
+// TODO: caching page status and make anti-function standalone
+/* Anti-Read-Detection built in cache by default, it costs 16MB memory. if you want to disable it for some reason,
+should make a new Reader like ReaderImplRPMWithAntiNoCache and remove cache code for performance. */
 func (r *ReaderImplRPMWithAnti) Read(addr, size uint) ([]byte, error) {
-	status := [8]byte{}
-	offset := int64(addr / 4096 * 8)
-	if _, err := r.pageMap.Seek(offset, os.SEEK_SET); err != nil {
-		return nil, fmt.Errorf("failed to read page atatus at 0x%x (0x%x): %v", offset, addr, err)
-	}
-	n, err := r.pageMap.Read(status[:])
-	if n != 8 {
-		return nil, fmt.Errorf("wrong page data at 0x%x (0x%x): %v", offset, addr, err)
-	}
-	memBits := binary.LittleEndian.Uint64(status[:])
-	if memBits>>62 == 0 {
-		return nil, fmt.Errorf("page at 0x%x (0x%x) is not present", offset, addr)
+	pages := (addr&4095 + size) >> 12
+	for i := uint(0); i < pages+1; i += 1 { //check every page status
+		fmt.Printf("pages:%d\n,Index:%d\n", pages, i)
+		pageIndex := addr>>12 + i                                      // page is 12 bits
+		cacheIndex := pageIndex >> 6                                   // pageIndex / 64
+		if ((r.safeBitSet[cacheIndex] >> (pageIndex & 63)) & 1) == 1 { // pageIndex % 64
+			continue //cache hit
+		}
+		status := [8]byte{}
+		offset := int64(pageIndex << 3)
+		if _, err := r.pageMap.Seek(offset, os.SEEK_SET); err != nil {
+			return nil, fmt.Errorf("failed to read page atatus at 0x%x (0x%x): %v", offset, addr, err)
+		}
+		n, err := r.pageMap.Read(status[:]) //disable inotify first,some app will listen to inotify event to monitor reading.
+		if n != 8 {
+			return nil, fmt.Errorf("wrong page data at 0x%x (0x%x): %v", offset, addr, err)
+		}
+		memBits := binary.LittleEndian.Uint64(status[:])
+		if memBits>>62 == 0 {
+			return nil, fmt.Errorf("page at 0x%x (0x%x) is not present", offset, addr)
+		}
+		r.safeBitSet[cacheIndex] |= 1 << (pageIndex & 63)
 	}
 	data, err := r.ReaderImplRPM.Read(addr, size)
 	return data, err
