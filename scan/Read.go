@@ -104,7 +104,6 @@ should make a new Reader like ReaderImplRPMWithAntiNoCache and remove cache code
 func (r *ReaderImplRPMWithAnti) Read(addr, size uint) ([]byte, error) {
 	pages := (addr&4095 + size) >> 12
 	for i := uint(0); i < pages+1; i += 1 { //check every page status
-		fmt.Printf("pages:%d\n,Index:%d\n", pages, i)
 		pageIndex := addr>>12 + i                                      // page is 12 bits
 		cacheIndex := pageIndex >> 6                                   // pageIndex / 64
 		if ((r.safeBitSet[cacheIndex] >> (pageIndex & 63)) & 1) == 1 { // pageIndex % 64

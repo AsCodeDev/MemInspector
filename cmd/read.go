@@ -41,7 +41,6 @@ func doCommand(cmd *cobra.Command, args []string) error {
 		}
 	}
 	data, err := reader.Read(uint(addr), uint(size))
-	data, err = reader.Read(uint(addr), uint(size))
 	if err != nil {
 		return err
 	}
@@ -60,7 +59,7 @@ func doCommand(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	if *format != "" {
-		cmd.Printf(*format, data)
+		cmd.Printf(*format+"\n", data)
 		return nil
 	}
 	cmd.Println(hex.EncodeToString(data))
