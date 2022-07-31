@@ -87,6 +87,18 @@ type ReaderImplRPMWithAnti struct {
 }
 
 func (r *ReaderImplRPMWithAnti) initImpl() *Reader {
+	/*
+		As a temporary solution, inotify will disable by setting 'max_user_watches' to 0.
+		Notice: You should start app after setting inotify,because no progress can register new inotify watcher.
+		'max_user_watches' will not restore automatically.
+		You can manually set 'max_user_watches' to a normal value if you want to use inotify after using MemInspector.
+		Restarting the device is also effective.
+	*/
+	stat, _ := CheckInotify()
+	if stat {
+		fmt.Printf("*** Inotify is enabled,you should disable it by \"MemInspector inotify off\" first! ***\n")
+		os.Exit(1)
+	}
 	r.ReaderImplRPM.initImpl()
 	page, err := os.OpenFile("/proc/"+strconv.Itoa(int(r.Reader.pid))+"/pagemap", os.O_RDONLY|os.O_SYNC, 0)
 	if err != nil {

@@ -41,7 +41,28 @@ func FindLibInfo(pid, libName string) (string, error) {
 }
 
 // DisableInotify TODO: find a more elegant way to restrict app's inotify
-func DisableInotify() {
+func DisableInotify() error {
 	command := "echo 0 > /proc/sys/fs/inotify/max_user_watches"
-	exec.Command("su", "-c", command)
+	cmd := exec.Command("su", "-c", command)
+	_, err := cmd.Output()
+	return err
+}
+func EnableInotify() error {
+	command := "echo 8192 > /proc/sys/fs/inotify/max_user_watches"
+	cmd := exec.Command("su", "-c", command)
+	_, err := cmd.Output()
+	return err
+}
+func CheckInotify() (bool, error) {
+	command := "cat /proc/sys/fs/inotify/max_user_watches"
+	cmd := exec.Command("su", "-c", command)
+	count, err := cmd.Output()
+	if err != nil {
+		fmt.Printf("cannot read inotify max_user_watches")
+		return true, err
+	}
+	if string(count)[0] == '0' {
+		return false, nil
+	}
+	return true, nil
 }

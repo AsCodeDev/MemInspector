@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"MemInspector/scan"
 	"log"
 	"os"
 
@@ -30,12 +29,4 @@ func init() {
 	if os.Getuid() != 0 {
 		log.Fatalln("Running without root is not supported temporarily")
 	}
-	/*
-		As a temporary solution, inotify will be disabled at startup by setting 'max_user_watches' to 0.
-		Notice: You should start app after setting,because no progress can register new inotify watcher.
-		'max_user_watches' will not restore automatically.
-		You can manually set 'max_user_watches' to a normal value if you want to use inotify after using MemInspector.
-		Restarting the device is also effective.
-	*/
-	scan.DisableInotify()
 }

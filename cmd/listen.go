@@ -13,7 +13,7 @@ import (
 // listenCmd represents the listen command
 var listenCmd = &cobra.Command{
 	Use:   "listen",
-	Short: "start rpc domain",
+	Short: "start rpc daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("listen called")
 	},
