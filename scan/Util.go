@@ -40,7 +40,7 @@ func FindLibInfo(pid, libName string) (string, error) {
 	return string(bytes), nil
 }
 
-// DisableInotify TODO: find a more elegant way to restrict app's inotify
+// DisableInotify TODO: need a more elegant way to restrict app's inotify
 func DisableInotify() error {
 	command := "echo 0 > /proc/sys/fs/inotify/max_user_watches"
 	cmd := exec.Command("su", "-c", command)

@@ -1,0 +1,8 @@
+module CommonInfo{
+    struct DeviceInfo{
+      0 require string deviceId;
+    };
+    interface Deivce{
+        int getDevice(out DeviceInfo d);
+    };
+};

@@ -126,6 +126,7 @@ func (r *ReaderImplRPMWithAnti) Read(addr, size uint) ([]byte, error) {
 		if _, err := r.pageMap.Seek(offset, os.SEEK_SET); err != nil {
 			return nil, fmt.Errorf("failed to read page atatus at 0x%x (0x%x): %v", offset, addr, err)
 		}
+		//use preadv may bypass inotify,but it's not a good idea.
 		n, err := r.pageMap.Read(status[:]) //disable inotify first,some app will listen to inotify event to monitor reading.
 		if n != 8 {
 			return nil, fmt.Errorf("wrong page data at 0x%x (0x%x): %v", offset, addr, err)

@@ -11,6 +11,7 @@ import (
 var (
 	hexdump  *bool
 	str      *bool
+	anti     *bool
 	format   *string
 	filename *string
 )
@@ -33,7 +34,12 @@ func doCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	size := uint64(4)
-	reader := scan.NewReader(uint(pid), scan.READER_IMPL_RPM_WITH_ANTI)
+	var reader *scan.Reader
+	if *anti {
+		reader = scan.NewReader(uint(pid), scan.READER_IMPL_RPM_WITH_ANTI)
+	} else {
+		reader = scan.NewReader(uint(pid), scan.READER_IMPL_RPM)
+	}
 	if len(args) == 3 {
 		size, err = strconv.ParseUint(args[2], 0, 32)
 		if err != nil {
@@ -70,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(readCmd)
 	hexdump = readCmd.Flags().Bool("hex", false, "output in hexdump style")
 	str = readCmd.Flags().Bool("str", false, "convert to string")
+	anti = readCmd.Flags().BoolP("anti", "a", false, "anti page status detection")
 	format = readCmd.Flags().StringP("format", "f", "", "print by custom format")
 	filename = readCmd.Flags().StringP("file", "o", "", "output to file")
 	readCmd.MarkFlagsMutuallyExclusive("hex", "str", "format")
